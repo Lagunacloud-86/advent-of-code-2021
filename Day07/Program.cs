@@ -94,6 +94,8 @@ namespace Day07
 
         }
 
+
+
         static void Calculate_Fuel_Usage(Dictionary<Int32, UInt64> fuelCount, Int32 index, Int32[] numbers)
         {
             if (!fuelCount.ContainsKey(index))

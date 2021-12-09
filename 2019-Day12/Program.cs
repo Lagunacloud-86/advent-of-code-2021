@@ -18,6 +18,9 @@ namespace _2019_Day12
             Console.WriteLine($"\tTest Case 2 Result: {Test_Case_2(100)}\n");
             Console.WriteLine($"\tPuzzle 1 Result: {Puzzle_Case_1(1000)}\n");
             //Console.WriteLine($"\tTest Case 2 Result: {Test_Case_2()}\n");
+
+            Console.WriteLine($"\tTest Case 1 Result: {Test_Case_3()}\n");
+            Console.WriteLine($"\tTest Case 2 Result: {Test_Case_4()}\n");
             //Console.WriteLine($"\tPuzzle 2 Result: {Puzzle_Case_2()}");
 
         }
@@ -27,22 +30,24 @@ namespace _2019_Day12
         {
             String input = ReadEmbeddedResource($"{Namespace}.test-case-1.txt");
             return Part_1_Logic(input, iterationCount);
-            //#if DEBUG
-            //            return Part_1_Logic(input, iterationCount, true);
-            //#else
-            //            return Part_1_Logic(input);
-            //#endif
         }
         static UInt64 Test_Case_2(Int32 iterationCount)
         {
             String input = ReadEmbeddedResource($"{Namespace}.test-case-2.txt");
             return Part_1_Logic(input, iterationCount);
-            //#if DEBUG
-            //            return Part_1_Logic(input, iterationCount, true);
-            //#else
-            //            return Part_1_Logic(input, iterationCount);
-            //#endif
         }
+        static UInt64 Test_Case_3()
+        {
+            String input = ReadEmbeddedResource($"{Namespace}.test-case-3.txt");
+            return Part_2_Logic(input);
+        }
+        static UInt64 Test_Case_4()
+        {
+            String input = ReadEmbeddedResource($"{Namespace}.test-case-4.txt");
+            return Part_2_Logic(input);
+        }
+
+
 
         static UInt64 Puzzle_Case_1(Int32 iterationCount)
         {
@@ -51,7 +56,7 @@ namespace _2019_Day12
             return Part_1_Logic(input, iterationCount);
         }
 
-        static UInt64 Puzzle_Case_2(Int32 iterationCount)
+        static UInt64 Puzzle_Case_2()
         {
             String input = ReadEmbeddedResource($"{Namespace}.puzzle-input-2.txt");
 
@@ -102,7 +107,15 @@ namespace _2019_Day12
 
         static UInt64 Part_2_Logic(String input)
         {
-          
+            String[] lines = input.Split(new char[] { '\n', });
+            List<Moon> moons = new List<Moon>();
+            for (Int32 i = 0; i < lines.Length; ++i)
+            {
+                Moon moon = new Moon();
+                moon.Position = ParseVectorLine(in lines[i]);
+                moon.Velocity = new Vector();
+                moons.Add(moon);
+            }
 
             return 0;
         }

@@ -122,8 +122,6 @@ namespace Day05
                     value++;
                     points[point] = value;
 
-
-
                 } while (!line.Point2.Equals(in x, in y));
 
             }
