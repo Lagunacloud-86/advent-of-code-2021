@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 
 namespace Day08
 {
@@ -72,17 +73,19 @@ namespace Day08
 
         static UInt64 Part_2_Logic(String input)
         {
-            Dictionary<Byte, Int32> bitMapper = new Dictionary<byte, int>();
-            bitMapper.Add((byte)0b01110111, 0);
-            bitMapper.Add((byte)0b00010010, 1);
-            bitMapper.Add((byte)0b01011101, 2);
-            bitMapper.Add((byte)0b01011011, 3);
-            bitMapper.Add((byte)0b00111010, 4);
-            bitMapper.Add((byte)0b01101011, 5);
-            bitMapper.Add((byte)0b01101111, 6);
-            bitMapper.Add((byte)0b01010010, 7);
-            bitMapper.Add((byte)0b01111111, 8);
-            bitMapper.Add((byte)0b01111011, 9);
+            Dictionary<Byte, char> bitMapper = new Dictionary<byte, char>();
+            bitMapper.Add((byte)0b01110111, '0');
+            bitMapper.Add((byte)0b00010010, '1');
+            bitMapper.Add((byte)0b01011101, '2');
+            bitMapper.Add((byte)0b01011011, '3');
+            bitMapper.Add((byte)0b00111010, '4');
+            bitMapper.Add((byte)0b01101011, '5');
+            bitMapper.Add((byte)0b01101111, '6');
+            bitMapper.Add((byte)0b01010010, '7');
+            bitMapper.Add((byte)0b01111111, '8');
+            bitMapper.Add((byte)0b01111011, '9');
+
+
 
             List<UInt32> entryNumbers = new List<UInt32>();
             String[] entries = input.Split(new char[] { '\n' });
@@ -101,51 +104,55 @@ namespace Day08
 
         }
 
-        static UInt32 CalculateEntry(in Dictionary<Byte, Int32> bitMapper, in String cipher, in String code)
+        static UInt32 CalculateEntry(in Dictionary<Byte, Char> bitMapper, in String cipher, in String code)
         {
             String[] cipherCodes = cipher.Split(new char[] { ' ' });
             String[] displayCodes = code.Split(new char[] { ' ' });
 
-            Dictionary<Int32, String> uniqueCiphers = new Dictionary<Int32, String>();
-            //Dictionary<String, Int32> cipherPointers = new Dictionary<string, int>();
 
-            Dictionary<Byte, Char> codeMap = new Dictionary<Byte, Char>();
-
-            BuildUniqueCiphers(cipherCodes, uniqueCiphers);
-
-
-            String temp = uniqueCiphers[7];
-            for(Int32 i = 0; i < uniqueCiphers[1].Length; ++i)
-                temp = temp.Replace(uniqueCiphers[1][i], ' ');
-            temp = temp.Trim();
-            codeMap.Add((byte)0b01000000, temp[0]);
-
-
-
-            
-            return 0;
-        }
-
-        static void BuildUniqueCiphers(in String[] cipherCodes, Dictionary<Int32, String> uniqueCiphers)
-        {
-            for (Int32 i = 0; i < cipherCodes.Length; ++i)
+            Dictionary<Char, Byte?> codeMap = new Dictionary<Char, Byte?>
             {
-                if (cipherCodes[i].Length == 2)
-                    uniqueCiphers.Add(1, cipherCodes[i]);
+                { 'a', null },
+                { 'b', null },
+                { 'c', null },
+                { 'd', null },
+                { 'e', null },
+                { 'f', null },
+                { 'g', null },
+            };
 
-                if (cipherCodes[i].Length == 3)
-                    uniqueCiphers.Add(7, cipherCodes[i]);
 
-                if (cipherCodes[i].Length == 4)
-                    uniqueCiphers.Add(4, cipherCodes[i]);
+           
 
-                if (cipherCodes[i].Length == 7)
-                    uniqueCiphers.Add(8, cipherCodes[i]);
+
+            StringBuilder stringBuilder = new StringBuilder();
+            for (Int32 i = 0; i < displayCodes.Length; ++i)
+            {
+                byte displayCode = 0;
+                for(int c = 0; c < displayCodes[i].Length; ++c)
+                    displayCode |= codeMap[displayCodes[i][c]].Value;
+
+                stringBuilder.Append(bitMapper[displayCode]);
             }
 
+            UInt32 result = Convert
+                .ToUInt32(stringBuilder.ToString());
+
+            return result;
         }
 
+        static Int32 CountBits(byte value)
+        {
+            Int32 count = 0;
 
+            for (Int32 i = 0; i < 8; ++i)
+            {
+                byte shifted = (byte)(value >> i);
+                count += (shifted & 0x1) == 1 ? 1 : 0;
+            }
+
+            return count;
+        }
 
 
         static String ReadEmbeddedResource(String resource)
