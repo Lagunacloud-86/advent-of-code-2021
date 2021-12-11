@@ -121,8 +121,40 @@ namespace Day08
                 { 'g', null },
             };
 
+            Dictionary<Char, List<String>> cipherPossibilities = new Dictionary<Char, List<String>>();
+            Dictionary<Byte, List<Char>> bitPossibilities = new Dictionary<Byte, List<Char>>();
+            //Dictionary<Byte, List<Char>> deductor = new Dictionary<Byte, List<Char>>();
 
-           
+            foreach (var bm in bitMapper)
+            {
+                Int32 count = CountBits(bm.Key);
+                List<String> ciphers = cipherCodes
+                    .Where(x => x.Length == count)
+                    .ToList();
+
+                cipherPossibilities.Add(bm.Value, ciphers);
+
+
+                //NOTE: THIS IS GROSS
+                List<char> possibilities = new List<char>();
+                foreach (var cc in ciphers)
+                    for (Int32 i = 0; i < cc.Length; ++i)
+                        if (!possibilities.Contains(cc[i]))
+                            possibilities.Add(cc[i]);
+
+                bitPossibilities.Add(bm.Key, possibilities);
+
+                //for(Int32 i = 0; i < 8; ++i)
+                //{
+                //    Byte mask = (Byte)(1 << i);
+                //    if ((bm.Key & mask) != 0)
+                //    {
+                //        bitPossibilities.Add((Byte)(bm.Key & mask), possibilities);
+                //    }
+                //}
+            }
+
+
 
 
             StringBuilder stringBuilder = new StringBuilder();
