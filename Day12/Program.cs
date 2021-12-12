@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Diagnostics;
 
 namespace Day12
 {
@@ -19,7 +20,15 @@ namespace Day12
             Console.WriteLine($"\tTest Case 3 Result: {Test_Case_3()}\n");
             Console.WriteLine($"\tTest Case 4 Result: {Test_Case_4()}\n");
             Console.WriteLine($"\tTest Case 5 Result: {Test_Case_5()}\n");
+
+
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             Console.WriteLine($"\tPuzzle 2 Result: {Puzzle_Case_2()}");
+
+            stopwatch.Stop();
+            Console.WriteLine($"Elapsed Time: {stopwatch.ElapsedMilliseconds}ms");
 
         }
 
