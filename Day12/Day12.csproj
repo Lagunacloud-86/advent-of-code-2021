@@ -5,24 +5,4 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="puzzle-input-1.txt" />
-    <None Remove="puzzle-input-2.txt" />
-    <None Remove="test-case-1.txt" />
-    <None Remove="test-case-2.txt" />
-    <None Remove="test-case-3.txt" />
-    <None Remove="test-case-4.txt" />
-    <None Remove="test-case-5.txt" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="puzzle-input-1.txt" />
-    <EmbeddedResource Include="puzzle-input-2.txt" />
-    <EmbeddedResource Include="test-case-1.txt" />
-    <EmbeddedResource Include="test-case-5.txt" />
-    <EmbeddedResource Include="test-case-4.txt" />
-    <EmbeddedResource Include="test-case-3.txt" />
-    <EmbeddedResource Include="test-case-2.txt" />
-  </ItemGroup>
-
 </Project>
