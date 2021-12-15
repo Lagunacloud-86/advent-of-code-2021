@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Day14
 {
@@ -17,9 +18,10 @@ namespace Day14
 
             //Console.WriteLine($"\tTest Case 1 Result: {Test_Case_1(true)}\n");
             //Console.WriteLine($"\tPuzzle 1 Result: {Puzzle_Case_1()}\n");
-            Console.WriteLine($"\tTest Case 2 Result: {Test_Case_2(true)}\n");
-            Console.WriteLine($"\tPuzzle 2 Result: {Puzzle_Case_2(true)}");
+            Task tc = Task.Run(() => Console.WriteLine($"\tTest Case 2 Result: {Test_Case_2(true)}\n"));
+            Task p2 = Task.Run(() => Console.WriteLine($"\tPuzzle 2 Result: {Puzzle_Case_2(true)}"));
 
+            Task.WaitAll(tc, p2);
         }
 
 
@@ -108,11 +110,13 @@ namespace Day14
                     counter.Add(rule[1].ToString()[0], 0);
             }
 
-
             FindPairsWithDepth(
                 insertRules,
                 counter,
                 lines[0].Trim(), 40);
+
+            foreach (var c in counter)
+                Console.WriteLine($"'{c.Key}': {c.Value}");
 
             UInt64 max = (UInt64)counter.Max(x => x.Value);
             UInt64 min = (UInt64)counter.Min(x => x.Value);
@@ -150,30 +154,66 @@ namespace Day14
             String polymer,
             Int32 depth)
         {
-            Stack<Node> nodes = new Stack<Node>();
+            List<Task<Dictionary<Char, UInt64>>> pairWorkers =
+                new List<Task<Dictionary<Char, UInt64>>>();
+
+            foreach (char entry in polymer)
+                counter[entry]++;
+
             for (Int32 i = 0; i < polymer.Length - 1; ++i)
             {
-                nodes.Push(new Node(in i, polymer[i], polymer[i + 1]));
-                while(nodes.Count > 0)
+                char left = polymer[i];
+                char right = polymer[i + 1];
+                var t = new Task<Dictionary<Char, UInt64>>(() => IteratePair(insertRules, left, right, depth));
+                t.Start();
+                pairWorkers.Add(t);
+            }
+
+
+            Task.WaitAll(pairWorkers.ToArray());
+
+
+
+            foreach(var task in pairWorkers)
+            {
+                foreach (var r in task.Result)
+                    counter[r.Key] += r.Value;
+            }
+        }
+        
+        static Dictionary<Char, UInt64> IteratePair(
+            Dictionary<UInt16, Char> insertRules, 
+            Char left, Char right,
+            Int32 depth)
+        {
+            Console.WriteLine($"Starting {depth} iterations for '{left}{right}'...");
+
+            Dictionary<Char, UInt64> counter = new Dictionary<char, ulong>();
+            foreach(var ir in insertRules.Select(x => x.Value).Distinct())
+                counter.Add(ir, 0);
+
+
+            Stack<Node> nodes = new Stack<Node>();
+            nodes.Push(new Node(0, in left, in right));
+
+            while(nodes.Count > 0)
+            {
+                Node node = nodes.Pop();
+
+                UInt16 code = (UInt16)((UInt16)(node.Left << 8) | (UInt16)node.Right);
+                char insert = insertRules[code];
+                counter[insert]++;
+
+                if (node.Depth + 1 < depth)
                 {
-                    Node node = nodes.Pop();
-
-                    counter[node.Left]++;
-                    counter[node.Right]++;
-
-                    UInt16 code = (UInt16)((UInt16)(node.Left << 8) | (UInt16)node.Right);
-                    char insert = insertRules[code];
-
-
-                    if (node.Depth <= depth)
-                    {
-                        nodes.Push(new Node(node.Depth + 1, node.Left, insert));
-                        nodes.Push(new Node(node.Depth + 1, insert, node.Right));
-                    }
-                    
+                    nodes.Push(new Node(node.Depth + 1, node.Left, insert));
+                    nodes.Push(new Node(node.Depth + 1, insert, node.Right));
                 }
             }
 
+            Console.WriteLine($"Ending {depth} iterations for '{left}{right}'...");
+
+            return counter;
         }
 
 
