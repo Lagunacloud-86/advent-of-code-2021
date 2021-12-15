@@ -18,10 +18,9 @@ namespace Day14
 
             //Console.WriteLine($"\tTest Case 1 Result: {Test_Case_1(true)}\n");
             //Console.WriteLine($"\tPuzzle 1 Result: {Puzzle_Case_1()}\n");
-            Task tc = Task.Run(() => Console.WriteLine($"\tTest Case 2 Result: {Test_Case_2(true)}\n"));
-            Task p2 = Task.Run(() => Console.WriteLine($"\tPuzzle 2 Result: {Puzzle_Case_2(true)}"));
+            Console.WriteLine($"\tTest Case 2 Result: {Test_Case_2(true)}\n");
+            Console.WriteLine($"\tPuzzle 2 Result: {Puzzle_Case_2(true)}");
 
-            Task.WaitAll(tc, p2);
         }
 
 
@@ -92,22 +91,15 @@ namespace Day14
         static UInt64 Part_2_Logic(String input, bool verbose = false)
         {
             String[] lines = input.Split(new char[] { '\n' });
-            Dictionary<UInt16, Char> insertRules = new Dictionary<UInt16, Char>();
+            Dictionary<String, Char> insertRules = new Dictionary<String, Char>();
             Dictionary<Char, UInt64> counter = new Dictionary<Char, UInt64>();
-
-            for (Int32 i = 0; i < lines[0].Trim().Length; ++i)
-                if (!counter.ContainsKey(lines[0].Trim()[i]))
-                    counter.Add(lines[0].Trim()[i], 0);
 
             for (Int32 i = 2; i < lines.Length; ++i)
             {
                 String[] ruleData = lines[i].Split("->");
                 String rule = ruleData[0].Trim();
-                UInt16 code = (UInt16)((UInt16)(rule[0] << 8) | (UInt16)rule[1]);
-                insertRules.Add(code, ruleData[1].Trim()[0]);
+                insertRules.Add(rule, ruleData[1].Trim()[0]);
 
-                if (!counter.ContainsKey(rule[1].ToString()[0]))
-                    counter.Add(rule[1].ToString()[0], 0);
             }
 
             FindPairsWithDepth(
@@ -149,72 +141,104 @@ namespace Day14
         }
 
         static void FindPairsWithDepth(
-            Dictionary<UInt16, Char> insertRules,
+            Dictionary<String, Char> insertRules,
             Dictionary<Char, UInt64> counter,
             String polymer,
             Int32 depth)
         {
-            List<Task<Dictionary<Char, UInt64>>> pairWorkers =
-                new List<Task<Dictionary<Char, UInt64>>>();
+            ReadOnlySpan<Char> polymerSpan = polymer;
 
-            foreach (char entry in polymer)
-                counter[entry]++;
+                Dictionary<String, UInt64> newPairs =
+                    new Dictionary<string, ulong>();
+            Dictionary<String, UInt64> pairs = new Dictionary<string, ulong>();
 
             for (Int32 i = 0; i < polymer.Length - 1; ++i)
             {
-                char left = polymer[i];
-                char right = polymer[i + 1];
-                var t = new Task<Dictionary<Char, UInt64>>(() => IteratePair(insertRules, left, right, depth));
-                t.Start();
-                pairWorkers.Add(t);
+                string key = polymerSpan.Slice(i, 2).ToString();
+                if (!pairs.ContainsKey(key))
+                    pairs.Add(key, 0);
+                pairs[key]++;
+
             }
-
-
-            Task.WaitAll(pairWorkers.ToArray());
-
-
-
-            foreach(var task in pairWorkers)
+            for (Int32 i = 0; i < polymer.Length; ++i)
             {
-                foreach (var r in task.Result)
-                    counter[r.Key] += r.Value;
+                if (!counter.ContainsKey(polymer[i]))
+                    counter.Add(polymer[i], 0);
+                counter[polymer[i]]++;
             }
+
+
+
+
+            for (Int32 i = 0; i < depth; ++i)
+            {
+
+                foreach (var pair in pairs)
+                {
+                    String entry1 = String.Concat(pair.Key[0], insertRules[pair.Key]);
+                    String entry2 = String.Concat(insertRules[pair.Key], pair.Key[1]);
+
+                    if (!counter.ContainsKey(insertRules[pair.Key]))
+                        counter.Add(insertRules[pair.Key], 0);
+
+                    counter[insertRules[pair.Key]] += pair.Value;
+
+
+                    if (!newPairs.ContainsKey(entry1))
+                        newPairs.Add(entry1, 0);
+
+                    if (!newPairs.ContainsKey(entry2))
+                        newPairs.Add(entry2, 0);
+
+                    newPairs[entry1] += pair.Value;
+                    newPairs[entry2] += pair.Value;
+
+                }
+                pairs.Clear();
+                foreach (var np in newPairs)
+                    pairs.Add(np.Key, np.Value);
+                newPairs.Clear();
+
+
+            }
+
+
         }
         
-        static Dictionary<Char, UInt64> IteratePair(
-            Dictionary<UInt16, Char> insertRules, 
-            Char left, Char right,
-            Int32 depth)
-        {
-            Console.WriteLine($"Starting {depth} iterations for '{left}{right}'...");
+        //static Dictionary<Char, UInt64> IteratePair(
+        //    Dictionary<UInt16, Char> insertRules, 
+        //    Char left, Char right,
+        //    Int32 depth)
+        //{
+        //    Console.WriteLine($"Starting {depth} iterations for '{left}{right}'...");
 
-            Dictionary<Char, UInt64> counter = new Dictionary<char, ulong>();
-            foreach(var ir in insertRules.Select(x => x.Value).Distinct())
-                counter.Add(ir, 0);
+        //    Dictionary<Char, UInt64> counter = new Dictionary<char, ulong>();
+        //    foreach(var ir in insertRules.Select(x => x.Value).Distinct())
+        //        counter.Add(ir, 0);
 
 
-            Stack<Node> nodes = new Stack<Node>();
-            nodes.Push(new Node(0, in left, in right));
+        //    Stack<Node> nodes = new Stack<Node>();
+        //    nodes.Push(new Node(0, in left, in right));
 
-            while(nodes.Count > 0)
-            {
-                Node node = nodes.Pop();
+        //    while(nodes.Count > 0)
+        //    {
+        //        Node node = nodes.Pop();
 
-                UInt16 code = (UInt16)((UInt16)(node.Left << 8) | (UInt16)node.Right);
-                char insert = insertRules[code];
-                counter[insert]++;
+        //        UInt16 code = (UInt16)((UInt16)(node.Left << 8) | (UInt16)node.Right);
+        //        char insert = insertRules[code];
+        //        counter[insert]++;
 
-                if (node.Depth + 1 < depth)
-                {
-                    nodes.Push(new Node(node.Depth + 1, node.Left, insert));
-                    nodes.Push(new Node(node.Depth + 1, insert, node.Right));
-                }
-            }
+        //        if (node.Depth + 1 < depth)
+        //        {
+        //            nodes.Push(new Node(node.Depth + 1, node.Left, insert));
+        //            nodes.Push(new Node(node.Depth + 1, insert, node.Right));
+        //        }
+        //    }
 
-            Console.WriteLine($"Ending {depth} iterations for '{left}{right}'...");
+        //    Console.WriteLine($"Ending {depth} iterations for '{left}{right}'...");
 
-            return counter;
-        }
+        //    return counter;
+        //}
 
 
         static String ReadEmbeddedResource(String resource)
