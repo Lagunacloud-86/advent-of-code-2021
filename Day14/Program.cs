@@ -105,7 +105,7 @@ namespace Day14
             FindPairsWithDepth(
                 insertRules,
                 counter,
-                lines[0].Trim(), 40);
+                lines[0].Trim(), 1000);
 
             foreach (var c in counter)
                 Console.WriteLine($"'{c.Key}': {c.Value}");
